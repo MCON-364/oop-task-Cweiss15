@@ -12,7 +12,10 @@ You are provided with an existing task-management system that uses object-orient
 ### Step 1: Convert a Data Class to a Record
 - Replace the existing `Task` class with a `record`
 - Remove unnecessary boilerplate
+- Remember that accessor methods on a Record are name() vs getName() and priority vs getPriority()
+- You can use Global Replace feature in IntelliJ to update all the references
 - Ensure the program still compiles and runs
+
 
 ### Step 2: Seal the Command Hierarchy
 - Make the `Command` interface sealed
