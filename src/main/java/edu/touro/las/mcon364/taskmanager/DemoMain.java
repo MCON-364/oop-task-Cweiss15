@@ -1,5 +1,7 @@
 package edu.touro.las.mcon364.taskmanager;
 
+import java.util.Optional;
+
 public class DemoMain {
     private final TaskRegistry registry;
     private final TaskManager manager;
@@ -40,7 +42,8 @@ public class DemoMain {
 
     private void demonstrateRetrievingTask() {
         System.out.println("\n2. Retrieving a specific task...");
-        Task retrieved = registry.get("Fix critical bug");
+        Task retrieved = registry.get("Fix critical bug")
+                .orElseThrow(() -> new RuntimeException("No such task"));
         if (retrieved != null) {
             System.out.println("   Found: " + retrieved.name() + " (Priority: " + retrieved.priority() + ")");
         } else {
@@ -70,7 +73,7 @@ public class DemoMain {
 
     private void demonstrateNullReturn() {
         System.out.println("\n6. Attempting to retrieve non-existent task...");
-        Task missing = registry.get("Non-existent task");
+        Optional<Task> missing = registry.get("Non-existent task");
         if (missing == null) {
             System.out.println("   Returned null - this should be refactored to use Optional!");
         }

@@ -8,8 +8,6 @@ public class TaskManager {
         this.registry = registry;
     }
 
-    // TODO: Students must refactor this using pattern-matching switch
-    // Current implementation uses old-style instanceof checks
     public void run(Command command) {
         switch(command) {
             case AddTaskCommand add -> add.execute();
