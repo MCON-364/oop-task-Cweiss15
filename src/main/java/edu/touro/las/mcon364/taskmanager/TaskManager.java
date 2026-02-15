@@ -1,5 +1,10 @@
 package edu.touro.las.mcon364.taskmanager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class TaskManager {
 
     private final TaskRegistry registry;
@@ -8,17 +13,12 @@ public class TaskManager {
         this.registry = registry;
     }
 
-    // TODO: Students must refactor this using pattern-matching switch
-    // Current implementation uses old-style instanceof checks
     public void run(Command command) {
-        if (command instanceof AddTaskCommand) {
-            command.execute();
-        } else if (command instanceof RemoveTaskCommand) {
-            command.execute();
-        } else if (command instanceof UpdateTaskCommand) {
-            command.execute();
-        } else {
-            throw new IllegalArgumentException("Unknown command type");
-        }
+        switch(command) {
+            case AddTaskCommand add -> add.execute();
+            case RemoveTaskCommand remove -> remove.execute();
+            case UpdateTaskCommand update -> update.execute();
+            case ChangeTaskName updateName -> updateName.execute();
+    }
     }
 }
