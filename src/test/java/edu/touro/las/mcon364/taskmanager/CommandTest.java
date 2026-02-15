@@ -39,7 +39,9 @@ class CommandTest {
         new AddTaskCommand(registry, originalTask).execute();
         new AddTaskCommand(registry, replacementTask).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Task").priority(),
+        assertEquals(Priority.HIGH, registry.get("Task").
+                        orElseThrow(() -> new RuntimeException("Task not found"))
+                        .priority(),
                 "Replacement task should have new priority");
     }
 
@@ -71,7 +73,7 @@ class CommandTest {
         Command command = new UpdateTaskCommand(registry, "Update me", Priority.HIGH);
         command.execute();
 
-        Task updated = registry.get("Update me");
+        Task updated = registry.get("Update me").orElseThrow(() -> new TaskNotFoundException("Update me"));
         assertNotNull(updated, "Task should still exist after update");
         assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated to HIGH");
     }
@@ -84,7 +86,7 @@ class CommandTest {
         Command command = new UpdateTaskCommand(registry, "Important task", Priority.LOW);
         command.execute();
 
-        Task updated = registry.get("Important task");
+        Task updated = registry.get("Important task").orElseThrow(() -> new TaskNotFoundException("Important task"));
         assertEquals("Important task", updated.name(), "Task name should be preserved");
     }
 
@@ -109,7 +111,7 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Flexible", Priority.LOW).execute();
 
-        assertEquals(Priority.LOW, registry.get("Flexible").priority(),
+        assertEquals(Priority.LOW, registry.get("Flexible").orElseThrow(() -> new TaskNotFoundException("Flexible")).priority(),
                 "Should allow decreasing priority");
     }
 
@@ -120,7 +122,7 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Urgent", Priority.HIGH).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Urgent").priority(),
+        assertEquals(Priority.HIGH, registry.get("Urgent").orElseThrow(() -> new TaskNotFoundException("Urgent")).priority(),
                 "Should allow increasing priority");
     }
 }

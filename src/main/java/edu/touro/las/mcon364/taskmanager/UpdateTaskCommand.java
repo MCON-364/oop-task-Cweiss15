@@ -15,7 +15,7 @@ public final class UpdateTaskCommand implements Command {
         // NOTE: This demonstrates old-style null checking
         // Students should refactor to use Optional and custom exceptions
         Task existing = registry.get(taskName)
-                .orElseThrow(() -> new TaskNotFoundException("Task" +taskName + " not found"));
+                .orElseThrow(() -> new TaskNotFoundException(taskName));
 
         // Create a new task with updated priority (tasks are immutable)
         Task updated = new Task(existing.name(), newPriority);

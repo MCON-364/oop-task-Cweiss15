@@ -49,23 +49,23 @@ class DemoMainTest {
         assertEquals(5, testRegistry.getAll().size(), "Should have 5 tasks");
 
         // Verify specific tasks exist with correct priorities
-        Task doc = testRegistry.get("Write documentation");
+        Task doc = testRegistry.get("Write documentation").orElseThrow(() -> new TaskNotFoundException("Write documentation"));
         assertNotNull(doc, "Write documentation task should exist");
         assertEquals(Priority.HIGH, doc.priority(), "Write documentation should be HIGH priority");
 
-        Task review = testRegistry.get("Review pull requests");
+        Task review = testRegistry.get("Review pull requests").orElseThrow(() -> new TaskNotFoundException("Review pull requests"));
         assertNotNull(review, "Review pull requests task should exist");
         assertEquals(Priority.MEDIUM, review.priority(), "Review pull requests should be MEDIUM priority");
 
-        Task dependencies = testRegistry.get("Update dependencies");
+        Task dependencies = testRegistry.get("Update dependencies").orElseThrow(() -> new TaskNotFoundException("Update dependencies"));
         assertNotNull(dependencies, "Update dependencies task should exist");
         assertEquals(Priority.LOW, dependencies.priority(), "Update dependencies should be LOW priority");
 
-        Task bug = testRegistry.get("Fix critical bug");
+        Task bug = testRegistry.get("Fix critical bug").orElseThrow(() -> new TaskNotFoundException("Fix critical bug"));
         assertNotNull(bug, "Fix critical bug task should exist");
         assertEquals(Priority.HIGH, bug.priority(), "Fix critical bug should be HIGH priority");
 
-        Task refactor = testRegistry.get("Refactor code");
+        Task refactor = testRegistry.get("Refactor code").orElseThrow(() -> new TaskNotFoundException("Refactor code"));
         assertNotNull(refactor, "Refactor code task should exist");
         assertEquals(Priority.MEDIUM, refactor.priority(), "Refactor code should be MEDIUM priority");
     }
@@ -81,7 +81,7 @@ class DemoMainTest {
         testManager.run(new AddTaskCommand(testRegistry, expectedTask));
 
         // Retrieve it
-        Task retrieved = testRegistry.get("Fix critical bug");
+        Task retrieved = testRegistry.get("Fix critical bug").orElseThrow(() -> new TaskNotFoundException("Fix critical bug"));
 
         // Verify
         assertNotNull(retrieved, "Retrieved task should not be null");
@@ -95,7 +95,7 @@ class DemoMainTest {
     void testDemonstrateRetrievingNonExistentTask() {
         TaskRegistry testRegistry = new TaskRegistry();
 
-        Task missing = testRegistry.get("Non-existent task");
+        Task missing = testRegistry.get("Non-existent task").orElseThrow(() -> new TaskNotFoundException("Non-existent task"));
 
         assertNull(missing, "Non-existent task should return null (before Optional refactoring)");
     }
@@ -110,14 +110,14 @@ class DemoMainTest {
         testManager.run(new AddTaskCommand(testRegistry, new Task("Refactor code", Priority.MEDIUM)));
 
         // Verify original priority
-        Task before = testRegistry.get("Refactor code");
+        Task before = testRegistry.get("Refactor code").orElseThrow(() -> new TaskNotFoundException("Refactor code"));
         assertEquals(Priority.MEDIUM, before.priority(), "Initial priority should be MEDIUM");
 
         // Update to HIGH priority
         testManager.run(new UpdateTaskCommand(testRegistry, "Refactor code", Priority.HIGH));
 
         // Verify updated priority
-        Task after = testRegistry.get("Refactor code");
+        Task after = testRegistry.get("Refactor code").orElseThrow(() -> new TaskNotFoundException("Refactor code"));
         assertNotNull(after, "Task should still exist after update");
         assertEquals(Priority.HIGH, after.priority(), "Priority should be updated to HIGH");
         assertEquals("Refactor code", after.name(), "Task name should remain unchanged");
@@ -167,7 +167,7 @@ class DemoMainTest {
         TaskRegistry testRegistry = new TaskRegistry();
 
         // Attempt to get non-existent task
-        Task missing = testRegistry.get("Non-existent task");
+        Task missing = testRegistry.get("Non-existent task").orElseThrow(() -> new TaskNotFoundException("Non-existent task"));
 
         // Verify it returns null (this is what needs to be refactored to Optional)
         assertNull(missing, "Getting non-existent task should return null (before Optional refactoring)");
@@ -237,7 +237,7 @@ class DemoMainTest {
         UpdateTaskCommand command = new UpdateTaskCommand(testRegistry, "Test task", Priority.HIGH);
         command.execute();
 
-        Task updated = testRegistry.get("Test task");
+        Task updated = testRegistry.get("Test task").orElseThrow(() -> new TaskNotFoundException("Test task"));
         assertNotNull(updated, "Task should still exist after update");
         assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated");
     }
@@ -275,7 +275,7 @@ class DemoMainTest {
 
         manager.run(new UpdateTaskCommand(testRegistry, "Test task", Priority.HIGH));
 
-        Task updated = testRegistry.get("Test task");
+        Task updated = testRegistry.get("Test task").orElseThrow(() -> new TaskNotFoundException("Test task"));
         assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated via TaskManager.run()");
     }
 }
