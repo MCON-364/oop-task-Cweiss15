@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -26,8 +28,9 @@ class CommandTest {
 
         command.execute();
 
-        assertNotNull(registry.get("New task"), "Task should be in registry after AddTaskCommand");
-        assertEquals(task, registry.get("New task"), "Added task should match");
+        Optional<Task> addedTask = registry.get("New task");
+        assertTrue(addedTask.isPresent(), "Task should be in registry after AddTaskCommand");
+        assertEquals(task, addedTask.get(), "Added task should match");
     }
 
     @Test
@@ -53,8 +56,9 @@ class CommandTest {
         Command command = new RemoveTaskCommand(registry, "To be removed");
         command.execute();
 
-        assertNull(registry.get("To be removed"), "Task should be removed from registry");
+        assertTrue(registry.get("To be removed").isEmpty(), "Task should be removed from registry");
     }
+
 
     @Test
     @DisplayName("RemoveTaskCommand on non-existent task should not throw")
@@ -91,16 +95,13 @@ class CommandTest {
     }
 
     @Test
-    @DisplayName("UpdateTaskCommand on non-existent task should not throw (pre-refactor)")
+    @DisplayName("UpdateTaskCommand on non-existent task should throw TaskNotFoundException")
     void testUpdateTaskCommandNonExistent() {
         Command command = new UpdateTaskCommand(registry, "Non-existent", Priority.HIGH);
 
-        // Pre-refactor: this should not throw, just print a warning
-        assertDoesNotThrow(command::execute,
-                "Updating non-existent task should not throw (before custom exception refactoring)");
+        assertThrows(TaskNotFoundException.class, () -> command.execute());
 
-        // Task should not be created
-        assertNull(registry.get("Non-existent"),
+        assertTrue(registry.get("Non-existent").isEmpty(),
                 "Non-existent task should not be created by update");
     }
 

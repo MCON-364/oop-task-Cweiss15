@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -95,9 +96,8 @@ class DemoMainTest {
     void testDemonstrateRetrievingNonExistentTask() {
         TaskRegistry testRegistry = new TaskRegistry();
 
-        Task missing = testRegistry.get("Non-existent task").orElseThrow(() -> new TaskNotFoundException("Non-existent task"));
-
-        assertNull(missing, "Non-existent task should return null (before Optional refactoring)");
+        Optional<Task> missing = testRegistry.get("Non-existent task");
+        assertTrue(missing.isEmpty(), "Non-existent task should return null (before Optional refactoring)");
     }
 
     @Test
@@ -131,15 +131,16 @@ class DemoMainTest {
 
         // This should NOT throw an exception in the pre-refactor version
         // It silently fails with a warning message
-        assertDoesNotThrow(() -> {
-            testManager.run(new UpdateTaskCommand(testRegistry, "Non-existent task", Priority.HIGH));
-        }, "Updating non-existent task should not throw (before custom exception refactoring)");
+        assertThrows(TaskNotFoundException.class, () ->
+                testManager.run(new UpdateTaskCommand(testRegistry, "Non-existent task", Priority.HIGH))
+        );
 
         // Verify task was not created
-        assertNull(testRegistry.get("Non-existent task"), "Non-existent task should not be created");
+        assertTrue(testRegistry.get("Non-existent task").isEmpty(), "Non-existent task should not be created");
     }
 
-    @Test
+
+@Test
     @DisplayName("Removing task should delete it from registry")
     void testDemonstrateRemovingTask() {
         TaskRegistry testRegistry = new TaskRegistry();
@@ -157,8 +158,8 @@ class DemoMainTest {
 
         // Verify removal
         assertEquals(1, testRegistry.getAll().size(), "Should have 1 task after removal");
-        assertNull(testRegistry.get("Update dependencies"), "Update dependencies should be removed");
-        assertNotNull(testRegistry.get("Fix critical bug"), "Fix critical bug should still exist");
+        assertTrue(testRegistry.get("Update dependencies").isEmpty(), "Update dependencies should be removed");
+        assertTrue(testRegistry.get("Fix critical bug").isPresent(), "Fix critical bug should still exist");
     }
 
     @Test
@@ -167,21 +168,18 @@ class DemoMainTest {
         TaskRegistry testRegistry = new TaskRegistry();
 
         // Attempt to get non-existent task
-        Task missing = testRegistry.get("Non-existent task").orElseThrow(() -> new TaskNotFoundException("Non-existent task"));
+        Optional<Task> missing = testRegistry.get("Non-existent task");
 
         // Verify it returns null (this is what needs to be refactored to Optional)
-        assertNull(missing, "Getting non-existent task should return null (before Optional refactoring)");
+        assertTrue(missing.isEmpty(), "Getting non-existent task should return null (before Optional refactoring)");
     }
 
     @Test
-    @DisplayName("Full demo run should execute without exceptions")
+    @DisplayName("Full demo run should handle non-existent tasks correctly")
     void testFullDemoRun() {
         DemoMain testDemo = new DemoMain();
 
-        // The full demo should run without throwing any exceptions
-        assertDoesNotThrow(() -> {
-            testDemo.run();
-        }, "Full demo should run without exceptions");
+        assertThrows(TaskNotFoundException.class, () -> testDemo.run());
     }
 
     @Test
@@ -212,9 +210,11 @@ class DemoMainTest {
         AddTaskCommand command = new AddTaskCommand(testRegistry, task);
         command.execute();
 
-        assertNotNull(testRegistry.get("Test task"), "Task should be added after command execution");
-        assertEquals(task, testRegistry.get("Test task"), "Added task should match original");
+        Optional<Task> addedTask = testRegistry.get("Test task");
+        assertTrue(addedTask.isPresent(), "Task should be added after command execution");
+        assertEquals(task, addedTask.get(), "Added task should match original");
     }
+
 
     @Test
     @DisplayName("Command pattern - RemoveTaskCommand should execute correctly")
@@ -225,7 +225,7 @@ class DemoMainTest {
         RemoveTaskCommand command = new RemoveTaskCommand(testRegistry, "Test task");
         command.execute();
 
-        assertNull(testRegistry.get("Test task"), "Task should be removed after command execution");
+        assertTrue(testRegistry.get("Test task").isEmpty(), "Task should be removed after command execution");
     }
 
     @Test
@@ -263,7 +263,7 @@ class DemoMainTest {
 
         manager.run(new RemoveTaskCommand(testRegistry, "Test task"));
 
-        assertNull(testRegistry.get("Test task"), "Task should be removed via TaskManager.run()");
+        assertTrue(testRegistry.get("Test task").isEmpty(), "Task should be removed via TaskManager.run()");
     }
 
     @Test

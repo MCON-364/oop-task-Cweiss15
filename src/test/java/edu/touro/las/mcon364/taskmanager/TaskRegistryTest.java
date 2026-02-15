@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -44,8 +46,8 @@ class TaskRegistryTest {
     @Test
     @DisplayName("Getting non-existent task should return null")
     void testGetNonExistent() {
-        Task result = registry.get("Non-existent").orElseThrow(()  -> new TaskNotFoundException("Non-existent"));
-        assertNull(result, "Non-existent task should return null (before Optional refactoring)");
+        Optional<Task> result = registry.get("Non-existent");
+        assertTrue(result.isEmpty(), "Non-existent task should return null (before Optional refactoring)");
     }
 
     @Test
@@ -56,7 +58,7 @@ class TaskRegistryTest {
 
         registry.remove("Test task");
 
-        assertNull(registry.get("Test task"), "Removed task should not be retrievable");
+        assertTrue(registry.get("Test task").isEmpty(), "Removed task should not be retrievable");
     }
 
     @Test
